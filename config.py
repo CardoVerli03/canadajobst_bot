@@ -17,9 +17,15 @@ TURSO_TOKEN = os.getenv("TURSO_TOKEN")
 WEBHOOK_URL = os.getenv("WEBHOOK_URL") 
 PORT = int(os.getenv("PORT", 10000)) 
 
-# --- JOB SOURCES (GOOGLE GATEWAY) ---
-# Hii inatafuta site ya jobbank.gc.ca yenye neno sponsorship au lmia ya siku 1 iliyopita
-RSS_URL = "https://news.google.com/rss/search?q=site:jobbank.gc.ca+%22sponsorship%22+OR+%22lmia%22+when:1d&hl=en-CA&gl=CA&ceid=CA:en"
+# --- ADZUNA API CREDENTIALS ---
+ADZUNA_APP_ID = "77fd8aaa"
+ADZUNA_APP_KEY = "e068ae31ce1c2a3e428ca0399875dcdb"
+
+# --- JOB SETTINGS ---
+# Tutatafuta kazi nchi ya Canada (ca)
+COUNTRY_CODE = "ca"
+# Tafuta maneno haya ya ujangili
+KEYWORDS = "sponsorship visa lmia"
 
 # --- SYSTEM SETTINGS ---
 SCAM_WARNING = "\n\n⚠️ *Legit employers NEVER ask for money. If asked to pay for a visa or job, it's a SCAM!*"
