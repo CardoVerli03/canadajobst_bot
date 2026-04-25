@@ -1,21 +1,32 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+import config
 
 def format_job_message(job):
-    """Tengeneza ujumbe wa Kiingereza uliotulia"""
+    """Generates a clean, professional English job post for the channel"""
+    
+    # Safisha title (Lower case then Title case for better reading)
+    clean_title = job['title'].strip().title()
+    
+    # Panga highlights vizuri na alama
     reasons_str = " | ".join(job['reasons'])
     
+    # Message Body
     message = (
-        f"{job['category']} **NEW JOB FOUND** {job['category']}\n"
+        f"{job['category']} **NEW OPPORTUNITY FOUND** {job['category']}\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n"
-        f"📌 **Title:** {job['title']}\n"
-        f"🌟 **Highlights:** {reasons_str}\n"
-        f"🎖️ **Score:** {job['score']}/7\n"
+        f"📌 **Position:** {clean_title}\n"
+        f"✨ **Highlights:** {reasons_str}\n"
+        f"📊 **Match Score:** {job['score']}/7\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n"
-        f"⚠️ *Legit employers NEVER ask for money. If asked to pay, it's a SCAM!*"
+        f"📍 Location: Canada (LMIA/Sponsorship)\n"
+        f"{config.SCAM_WARNING}"
     )
     
-    # Kitufe cha Apply
-    keyboard = [[InlineKeyboardButton("Apply Now ↗️", url=job['link'])]]
+    # Modern Buttons
+    keyboard = [
+        [InlineKeyboardButton("Apply Now ↗️", url=job['link'])],
+        # Unaweza kuongeza button ya pili hapa kama unataka, mfano Contact Admin
+    ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     return message, reply_markup

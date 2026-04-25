@@ -4,3 +4,5 @@ libsql-client
 feedparser
 requests
 apscheduler
+flask
+gunicorn
