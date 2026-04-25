@@ -1,49 +1,53 @@
-import feedparser
 import requests
 import config
 import database
 import processor
 import logging
-import re
 
 logger = logging.getLogger(__name__)
 
-HEADERS = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-}
-
 def fetch_rss_jobs():
-    """Fetch jobs via Google News RSS to bypass direct site blocks"""
-    logger.info("📡 Scanning via Google News Gateway (Plan B)...")
+    """Fetch jobs from Adzuna API (The Final Boss Strategy)"""
+    logger.info(f"📡 Scanning Adzuna API for {config.KEYWORDS} in {config.COUNTRY_CODE}...")
     
+    # Adzuna API URL Construction
+    # 'results_per_page=50' inatuhakikishia tunapata mzigo wa kutosha kila scan
+    url = f"https://api.adzuna.com/v1/api/jobs/{config.COUNTRY_CODE}/search/1"
+    params = {
+        'app_id': config.AD_APP_ID if hasattr(config, 'AD_APP_ID') else config.ADZUNA_APP_ID,
+        'app_key': config.AD_APP_KEY if hasattr(config, 'AD_APP_KEY') else config.ADZUNA_APP_KEY,
+        'results_per_page': 50,
+        'what': config.KEYWORDS,
+        'content-type': 'application/json'
+    }
+
     try:
-        response = requests.get(config.RSS_URL, headers=HEADERS, timeout=15)
+        response = requests.get(url, params=params, timeout=20)
         
         if response.status_code != 200:
-            logger.error(f"❌ Gateway Blocked: Status {response.status_code}")
+            logger.error(f"❌ Adzuna API Error: {response.status_code} - {response.text}")
             return []
             
-        feed = feedparser.parse(response.content)
+        data = response.json()
+        results = data.get('results', [])
         new_jobs = []
 
-        for entry in feed.entries:
-            # Google News ID huwa ni ndefu sana, tunachukua herufi 20 za mwanzo kama ID ya Turso
-            raw_id = entry.get('id', entry.link)
-            job_id = re.sub(r'\W+', '', raw_id)[:20] 
+        for job in results:
+            # Adzuna ID ni ya kipekee (Unique)
+            job_id = str(job.get('id'))
             
             if database.is_already_posted(job_id):
                 continue
                 
-            title = entry.title
-            link = entry.link
-            # Google News mara nyingi haina summary ya maana, tunascan title
-            summary = entry.get('summary', '')
+            title = job.get('title', '')
+            link = job.get('redirect_url', '')
+            # Adzuna inatoa 'description' nzuri kwa ajili ya processor yetu
+            description = job.get('description', '')
             
-            # Hatua ya Scoring
-            score, category, reasons = processor.calculate_job_score(title, summary)
+            # Hatua ya Scoring - Hapa tunahakikisha ni sponsorship kweli
+            score, category, reasons = processor.calculate_job_score(title, description)
             
-            # Kwa sababu Google News URL yetu imesha-filter "Sponsorship", 
-            # hata score ya 2 (Category pekee) inatosha kupost.
+            # Tunapata kazi ambazo zina sifa kweli
             if score >= 2:
                 new_jobs.append({
                     "job_id": job_id,
@@ -54,14 +58,14 @@ def fetch_rss_jobs():
                     "score": score
                 })
         
-        logger.info(f"✅ Gateway Scan complete. Found {len(new_jobs)} jobs.")
+        logger.info(f"✅ Adzuna scan complete. Found {len(new_jobs)} worthy jobs.")
         return new_jobs
 
     except Exception as e:
-        logger.error(f"❌ Gateway Error: {e}")
+        logger.error(f"❌ Adzuna Critical Failure: {e}")
     
     return []
 
 def fetch_csv_jobs():
-    """CSV disabled for Cloud stability"""
+    """Disabled to save resources"""
     return []
