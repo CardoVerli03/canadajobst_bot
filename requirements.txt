@@ -1,0 +1,6 @@
+python-telegram-bot[job-queue]
+python-dotenv
+libsql-client
+feedparser
+requests
+apscheduler
